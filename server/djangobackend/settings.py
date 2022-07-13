@@ -27,7 +27,7 @@ DEBUG = True
 
 APPEND_SLASH = True
 
-ALLOWED_HOSTS = ["localhost"]
+ALLOWED_HOSTS = ["localhost","jpmorganjere-8000.us-east.mybluemix.net.us-east.mybluemix.net"]
 
 
 # Application definition
