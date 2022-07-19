@@ -21,22 +21,31 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="contact">Contact Us</a>
         </div>
-        <form action="/login.php">
-            <button 
-                type="submit" 
-                style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
-                formaction="./login"
-            >
-                Login
-            </button>
-            <button 
-                type="submit" 
-                style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
-                formaction="./signup"
-            >
-                Sign Up
-            </button>
-        </form>
+        {% if user.is_authenticated %}
+            <div style="display: flex; flex-direction: row; align-items: center;">
+                <button style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">Hello, {{user.first_name}}!</button>
+                <button style="margin-left: 10px;background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">
+                    <a href="{% url 'djangoapp:logout' %}">Logout</a>
+                </button>
+            </div>
+        {% else %}
+            <form action="/login.php">
+                <button 
+                    type="submit" 
+                    style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
+                    formaction="./login"
+                >
+                    Login
+                </button>
+                <button 
+                    type="submit" 
+                    style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
+                    formaction="./signup"
+                >
+                    Sign Up
+                </button>
+            </form>
+        {% endif %}
     </div>
 </nav>
     <h1 style="text-align:center;margin:80px;">
