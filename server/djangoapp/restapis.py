@@ -2,7 +2,38 @@ import requests
 import json
 # import related models here
 from requests.auth import HTTPBasicAuth
+from cloudant.client import Cloudant
+from cloudant.error import CloudantException
+import requests
+import os
 
+client = Cloudant.iam(
+    account_name="949fe2a8-5bb8-45a9-abfe-4ab7769e65b4-bluemix",
+    api_key="RtXYQUFmw3Plhy7LAVoKPC_XtHZrfr4mlG23JBkTiPGY",
+    connect=True,
+)
+
+dealership_db = client["dealerships"]
+review_db     = client["reviews"]
+
+dealership_db.create_query_index(fields=['state'])
+
+def getDealershipByState(state):
+
+    try:
+        selector = {'state': {'$eq': state}}
+        docs = dealership_db.get_query_result(selector)
+        for doc in docs:
+            print (doc)
+
+    except CloudantException as ce:
+        print("unable to connect")
+        return {"error": ce}
+    except (requests.exceptions.RequestException, ConnectionResetError) as err:
+        print("connection error")
+        return {"error": err}
+
+    return {"doc": doc}
 
 # Create a `get_request` to make HTTP GET requests
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
