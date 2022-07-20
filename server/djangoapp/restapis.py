@@ -20,11 +20,13 @@ dealership_db.create_query_index(fields=['state'])
 
 def getDealershipByState(state):
 
+    dealerships = []
+
     try:
         selector = {'state': {'$eq': state}}
         docs = dealership_db.get_query_result(selector)
         for doc in docs:
-            print (doc)
+            dealerships.append(doc)
 
     except CloudantException as ce:
         print("unable to connect")
@@ -33,7 +35,24 @@ def getDealershipByState(state):
         print("connection error")
         return {"error": err}
 
-    return {"doc": doc}
+    return {"dealerships": dealerships}
+
+def getAllDealerships():
+
+    dealerships = []
+
+    try:
+        for document in dealership_db:
+            dealerships.append(document)
+
+    except CloudantException as ce:
+        print("unable to connect")
+        return {"error": ce}
+    except (requests.exceptions.RequestException, ConnectionResetError) as err:
+        print("connection error")
+        return {"error": err}
+
+    return {"dealerships": dealerships}
 
 # Create a `get_request` to make HTTP GET requests
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},

@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-from .restapis import getDealershipByState
+from .restapis import getDealershipByState, getAllDealerships
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -95,11 +95,14 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     context = {}
-    if request.method == "GET":
-        context = getDealershipByState("Iowa")
+    if request.method == "GET" and 'state' in request.GET:
+        context = getDealershipByState(request.GET['state'])
         print("CONTEXT:" + str(context))
         return render(request, 'djangoapp/index.html', context)
-
+    else:
+        context = getAllDealerships()
+        print("CONTEXT:" + str(context))
+        return render(request, 'djangoapp/index.html', context)
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
