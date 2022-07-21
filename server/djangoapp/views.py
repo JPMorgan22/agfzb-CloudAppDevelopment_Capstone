@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-from .restapis import getDealershipByState, getAllDealerships
+from .restapis import getDealershipByState, getAllDealerships, getReviewByDealership
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -105,10 +105,14 @@ def get_dealerships(request):
         return render(request, 'djangoapp/index.html', context)
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
-def get_dealer_details(request, dealer_id):
+def get_dealer_details(request):
     context = {}
-    if request.method == "GET":
+    if request.method == "GET" and 'dealerId' in request.GET:
+        context = getReviewByDealership(request.GET['dealerId'])
         return render(request, 'djangoapp/dealer_details.html', context)
+    
+    elif request.method == "POST":
+        print("do something lol")
 
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):

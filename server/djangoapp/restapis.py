@@ -14,9 +14,10 @@ client = Cloudant.iam(
 )
 
 dealership_db = client["dealerships"]
-review_db     = client["reviews"]
+review_db = client["reviews"]
 
 dealership_db.create_query_index(fields=['state'])
+review_db.create_query_index(fields=['dealership'])
 
 def getDealershipByState(state):
 
@@ -53,6 +54,26 @@ def getAllDealerships():
         return {"error": err}
 
     return {"dealerships": dealerships}
+
+def getReviewByDealership(dealer_id):
+
+    reviews = []
+
+    try:
+        selector = {'dealership': {'$eq': int(dealer_id)}}
+        docs = review_db.get_query_result(selector)
+        for doc in docs:
+            reviews.append(doc)
+
+    except CloudantException as ce:
+        print("unable to connect")
+        return {"error": ce}
+    except (requests.exceptions.RequestException, ConnectionResetError) as err:
+        print("connection error")
+        return {"error": err}
+
+    print("HERES WHAT WE GOT:" + str(reviews))
+    return {"reviews": reviews}
 
 # Create a `get_request` to make HTTP GET requests
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
