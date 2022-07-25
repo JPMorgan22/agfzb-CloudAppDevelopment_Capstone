@@ -1,6 +1,6 @@
 import requests
 import json
-# import related models here
+from .models import CarDealer
 from requests.auth import HTTPBasicAuth
 from cloudant.client import Cloudant
 from cloudant.error import CloudantException
@@ -18,6 +18,21 @@ review_db = client["reviews"]
 
 dealership_db.create_query_index(fields=['state'])
 review_db.create_query_index(fields=['dealership'])
+
+def get_request(url, **kwargs):
+    print(kwargs)
+    print("GET from {} ".format(url))
+    try:
+        # Call get method of requests library with URL and parameters
+        response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=kwargs)
+    except:
+        # If any error occurs
+        print("Network exception occurred")
+    status_code = response.status_code
+    print("With status {} ".format(status_code))
+    json_data = json.loads(response.text)
+    return json_data
 
 def getDealershipByState(state):
 
@@ -38,22 +53,46 @@ def getDealershipByState(state):
 
     return {"dealerships": dealerships}
 
-def getAllDealerships():
+# if url is passed, use cf api to create request, else use python-cloudant sdk
+def getAllDealerships(url=None):
 
     dealerships = []
+    if url is None:
+        try:
+            for document in dealership_db:
+                if 'short_name' in document:
+                    dealer_obj = CarDealer(address=document["address"], city=document["city"], 
+                        full_name=document["full_name"], id=document["id"], 
+                        lat=document["lat"], long=document["long"],
+                        short_name=document["short_name"],
+                        st=document["st"], zip=document["zip"])
+                    dealerships.append(dealer_obj)
 
-    try:
-        for document in dealership_db:
-            dealerships.append(document)
+        except CloudantException as ce:
+            print("unable to connect")
+            return {"error": ce}
+        except (requests.exceptions.RequestException, ConnectionResetError) as err:
+            print("connection error")
+            return {"error": err}
 
-    except CloudantException as ce:
-        print("unable to connect")
-        return {"error": ce}
-    except (requests.exceptions.RequestException, ConnectionResetError) as err:
-        print("connection error")
-        return {"error": err}
+        return {"dealerships": dealerships}
+    else:
+        json_result = get_request(url)
+        if json_result:
+            # Get the row list in JSON as dealers
+            dealers = json_result["rows"]
+            # For each dealer object
+            for dealer in dealers:
+                # Get its content in `doc` object
+                dealer_doc = dealer["doc"]
+                # Create a CarDealer object with values in `doc` object
+                dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"], full_name=dealer_doc["full_name"],
+                                    id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"],
+                                    short_name=dealer_doc["short_name"],
+                                    st=dealer_doc["st"], zip=dealer_doc["zip"])
+                dealerships.append(dealer_obj)
 
-    return {"dealerships": dealerships}
+        return {"dealerships":dealerships}
 
 def getReviewByDealership(dealer_id):
 
