@@ -100,14 +100,15 @@ def get_dealerships(request):
         print("CONTEXT:" + str(context))
         # return render(request, 'djangoapp/index.html', context)
     else:
-        url = "jpmorganjere-8000.us-east.mybluemix.net/djangoapp/dealership"
-        context = getAllDealerships(url)
+        url = "https://jpmorganjere-8000.us-east.mybluemix.net/djangoapp/dealership"
+        context = getAllDealerships()
         short_names = []
         for dealer in context['dealerships']:
             if 'short_name' in vars(dealer):
                 short_names.append(vars(dealer)['short_name'])
+        string = " ".join(short_names)
         context = {"short_names":short_names}
-        return HttpResponse(short_names)
+        return HttpResponse(string)
         # return render(request, 'djangoapp/index.html', context)
 
 # Create a `get_dealer_details` view to render the reviews of a dealer

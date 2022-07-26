@@ -26,11 +26,13 @@ def get_request(url, **kwargs):
         # Call get method of requests library with URL and parameters
         response = requests.get(url, headers={'Content-Type': 'application/json'},
                                     params=kwargs)
-    except:
+    except requests.exceptions.RequestException as e:  # This is the correct syntax
+        raise SystemExit(e)
         # If any error occurs
         print("Network exception occurred")
     status_code = response.status_code
     print("With status {} ".format(status_code))
+    print(response.content)
     json_data = json.loads(response.text)
     return json_data
 
