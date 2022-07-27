@@ -95,6 +95,7 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     context = {}
+    dealerships = []
     if request.method == "GET" and 'state' in request.GET:
         context = getDealershipByState(request.GET['state'])
         print("CONTEXT:" + str(context))
@@ -105,10 +106,9 @@ def get_dealerships(request):
         short_names = []
         for dealer in context['dealerships']:
             if 'short_name' in vars(dealer):
-                short_names.append(vars(dealer)['short_name'])
-        string = " ".join(short_names)
-        context = {"short_names":short_names}
-        return HttpResponse(string)
+                dealerships.append(vars(dealer))
+        context = {"dealerships":dealerships}
+        return HttpResponse(context)
         # return render(request, 'djangoapp/index.html', context)
 
 # Create a `get_dealer_details` view to render the reviews of a dealer

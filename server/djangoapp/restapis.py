@@ -32,6 +32,7 @@ def get_request(url, **kwargs):
         print("Network exception occurred")
     status_code = response.status_code
     print("With status {} ".format(status_code))
+    print(response.headers['content-type'])
     print(response.content)
     json_data = json.loads(response.text)
     return json_data
