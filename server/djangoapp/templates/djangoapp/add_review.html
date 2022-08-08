@@ -10,7 +10,125 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
 
 </head>
-    <body>
-    <!--Add review form here -->
-    </body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div style="justify-content:space-around;" class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{% url 'djangoapp:index' %}">Dealerships</a>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{% url 'djangoapp:about' %}">About Us</a>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{% url 'djangoapp:contact' %}">Contact Us</a>
+            </div>
+            {% if user.is_authenticated %}
+                <div style="display: flex; flex-direction: row; align-items: center;">
+                    <button style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">Hello, {{user.first_name}}!</button>
+                    <button style="margin-left: 10px;background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">
+                        <a href="{% url 'djangoapp:logout' %}">Logout</a>
+                    </button>
+                </div>
+            {% else %}
+                <form action="./">
+                    <button 
+                        type="submit" 
+                        style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
+                        formaction="{% url 'djangoapp:login' %}"
+                    >
+                        Login
+                    </button>
+                    <button 
+                        type="submit" 
+                        style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
+                        formaction="{% url 'djangoapp:signup' %}"
+                    >
+                        Sign Up
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <form action="{% url 'djangoapp:add_review' dealer_id %}" method="post">
+            <h3>Enter review for dealership</h3>
+            <h6 style="color: grey;">Desribe your experience:</h6>
+            <textarea class="form-control" id="review" name="review" rows="2" required></textarea>
+            <input class="form-check-input" type="checkbox" name="purchasecheck" id="purchasecheck">
+            <p style="margin-left:25px;font-weight: 600;">Did you purchase a car here? (If checked, provide the car details below)</p>
+            <div class="carName">
+                <p style="margin-top: 2px;font-weight: 600;">Which car did you purchase?:</p>
+                <select name="car" id="car" class="form-select" required>
+                    <option selected value="2008 Ford F-150">2008 Ford F-150</option>
+                    <option selected value="2007 Jeep Commander">2007 Jeep Commander</option>
+                </select>
+            </div>
+            <div class="purchaseDate">
+                <p style="margin-top: 2px;font-weight: 600;">Date you purchased the car:</p>
+                <input class="date-own form-control" type="text" name="purchasedate" id="purchasedate" placeholder="MM/DD/YYYY">
+            </div>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'djangoapp:review' %}?dealerId={{ dealer_id }}">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+<script type="text/javascript">
+    $('.date-own').datepicker({
+        format: 'mm/dd/yyyy',
+        defaultDate: +7
+        });
+</script>
+
 </html>
+
+
+<style>
+    .form-control {
+        background-color: white;
+        width: 50vw;
+        margin-bottom: 40px;
+    }
+    .form-check-input {
+        background-color: white;
+        margin-left: 2px;
+    }
+    .form-container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .form-select {
+        margin-top: 3px;
+        margin-left: 20px;
+        width: 200px;
+        height: 30px;
+    }
+    .date-own {
+        max-width: 200px;
+        height: 30px;
+        margin-left: 30px;
+    }
+    .purchaseDate {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        margin-top: 10px2;
+    }
+    .carName {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        margin-top: 25px;
+    }
+    button {
+        background-color:#DFE3EE;
+        border-radius:5px;
+        border-width:0px;
+        padding-left:10px;
+        padding-right:10px;
+        color:#3B5998
+}
+</style>

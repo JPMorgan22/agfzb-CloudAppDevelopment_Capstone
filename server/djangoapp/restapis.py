@@ -1,11 +1,23 @@
 import requests
 import json
-from .models import CarDealer
+import random
+from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 from cloudant.client import Cloudant
 from cloudant.error import CloudantException
 import requests
 import os
+from ibm_watson import NaturalLanguageUnderstandingV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from ibm_watson.natural_language_understanding_v1 \
+    import Features, SentimentOptions
+
+authenticator = IAMAuthenticator('eiErHXVKabJ_ouMD8V24T7_w-czR0wvoDwujPTLCY3Hy')
+natural_language_understanding = NaturalLanguageUnderstandingV1(
+    version='2022-04-07',
+    authenticator=authenticator)
+
+natural_language_understanding.set_service_url('https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/b36b026b-0758-43bf-b2d5-48e48096132b')
 
 client = Cloudant.iam(
     account_name="949fe2a8-5bb8-45a9-abfe-4ab7769e65b4-bluemix",
@@ -30,6 +42,10 @@ def get_request(url, **kwargs):
         raise SystemExit(e)
         # If any error occurs
         print("Network exception occurred")
+    # status_code = response.status_code
+    # print("With status {} ".format(status_code))
+    # json_data = json.loads(response.text)
+    # return json_data
     status_code = response.status_code
     print("With status {} ".format(status_code))
     print(response.headers['content-type'])
@@ -44,8 +60,14 @@ def getDealershipByState(state):
     try:
         selector = {'state': {'$eq': state}}
         docs = dealership_db.get_query_result(selector)
-        for doc in docs:
-            dealerships.append(doc)
+        for document in docs:
+            if 'short_name' in document:
+                dealer_obj = CarDealer(address=document["address"], city=document["city"], 
+                    full_name=document["full_name"], id=document["id"], 
+                    lat=document["lat"], long=document["long"],
+                    short_name=document["short_name"],
+                    st=document["st"], zip=document["zip"])
+                dealerships.append(dealer_obj)
 
     except CloudantException as ce:
         print("unable to connect")
@@ -104,8 +126,17 @@ def getReviewByDealership(dealer_id):
     try:
         selector = {'dealership': {'$eq': int(dealer_id)}}
         docs = review_db.get_query_result(selector)
-        for doc in docs:
-            reviews.append(doc)
+        for document in docs:
+            sentiment = analyze_review_sentiments(document["review"])
+            review_obj = DealerReview(dealership=document["dealership"], purchase=document["purchase"], 
+                                name=document["name"], id=document["id"] if 'id' in document else random.randint(10, 999), 
+                                review=document["review"], 
+                                purchase_date=document["purchase_date"] if (document["purchase"] == True) else None,
+                                car_make=document["car_make"] if (document["purchase"] == True) else None,
+                                car_model=document["car_model"] if (document["purchase"] == True) else None, 
+                                car_year=document["car_year"] if (document["purchase"] == True) else None,
+                                sentiment=sentiment)
+            reviews.append(review_obj)
 
     except CloudantException as ce:
         print("unable to connect")
@@ -117,31 +148,26 @@ def getReviewByDealership(dealer_id):
     print("HERES WHAT WE GOT:" + str(reviews))
     return {"reviews": reviews}
 
-# Create a `get_request` to make HTTP GET requests
-# e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
-#                                     auth=HTTPBasicAuth('apikey', api_key))
-
-
-# Create a `post_request` to make HTTP POST requests
-# e.g., response = requests.post(url, params=kwargs, json=payload)
-
-
-# Create a get_dealers_from_cf method to get dealers from a cloud function
-# def get_dealers_from_cf(url, **kwargs):
-# - Call get_request() with specified arguments
-# - Parse JSON results into a CarDealer object list
-
-
-# Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
-# def get_dealer_by_id_from_cf(url, dealerId):
-# - Call get_request() with specified arguments
-# - Parse JSON results into a DealerView object list
-
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
-# def analyze_review_sentiments(text):
-# - Call get_request() with specified arguments
-# - Get the returned sentiment label such as Positive or Negative
+def analyze_review_sentiments(text):
+    if(text is None):
+        return "No review"
+
+    response = natural_language_understanding.analyze(
+                text=text,
+                features=Features(
+                sentiment=SentimentOptions(document=True))).get_result()
+    return response["sentiment"]["document"]["label"]
+
+def addReviewToCloudant(review):
+
+    my_document = review_db.create_document(review)
+    if my_document.exists():
+        print('SUCCESS!!')
+    else:
+        print("Error creating document")
+
 
 
 

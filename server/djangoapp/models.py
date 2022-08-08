@@ -7,10 +7,10 @@ class CarMake(models.Model):
     
     # Create a toString method for object string representation
     def __str__(self):
-        return self.name + " " + self.description
+        return self.Name + " " + self.Description
 
 class CarModel(models.Model):
-    carMake = models.ForeignKey(CarMake, null=True, on_delete=models.CASCADE)
+    CarMake = models.ForeignKey(CarMake, null=True, on_delete=models.CASCADE)
     DealerID = models.IntegerField()
     Name = models.CharField(null=False, max_length=30, default='Focus')
     SEDAN = 'sedan'
@@ -71,9 +71,12 @@ class DealerReview:
         self.purchase = purchase
         self.name = name
         self.id = id
-        self.review = revie
+        self.review = review
         self.purhase_date = purchase_date
         self.car_make = car_make
         self.car_model = car_model
         self.car_year = car_year
         self.sentiment = sentiment
+
+    def __str__(self):
+        return "Reviewer: " + self.name + ", make: " + self.car_make + ", model: " + self.car_model + ", dealership: " + self.dealership + ", review: " + self.review

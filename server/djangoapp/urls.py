@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from django.conf.urls.static import static
 from django.conf import settings
 from . import views
@@ -25,6 +25,6 @@ urlpatterns = [
 
     path(route='review', view=views.get_dealer_details, name='review'),
 
-    # path for add a review view
+    re_path(r'^add_review/(?P<dealer_id>[0-9]{1,4})/$', view=views.add_review, name='add_review'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

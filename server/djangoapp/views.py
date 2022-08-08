@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-from .restapis import getDealershipByState, getAllDealerships, getReviewByDealership
+from .restapis import getDealershipByState, getAllDealerships, getReviewByDealership, addReviewToCloudant
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -98,30 +98,72 @@ def get_dealerships(request):
     dealerships = []
     if request.method == "GET" and 'state' in request.GET:
         context = getDealershipByState(request.GET['state'])
-        print("CONTEXT:" + str(context))
-        # return render(request, 'djangoapp/index.html', context)
-    else:
-        url = "https://jpmorganjere-8000.us-east.mybluemix.net/djangoapp/dealership"
-        context = getAllDealerships(url)
-        short_names = []
         for dealer in context['dealerships']:
             if 'short_name' in vars(dealer):
                 dealerships.append(vars(dealer))
         context = {"dealerships":dealerships}
-        return HttpResponse(str(context))
-        # return render(request, 'djangoapp/index.html', context)
+        return render(request, 'djangoapp/index.html', context)
+    else:
+        url = "https://jpmorganjere-8000.us-east.mybluemix.net/djangoapp/dealership"
+        context = getAllDealerships()
+        for dealer in context['dealerships']:
+            if 'short_name' in vars(dealer):
+                dealerships.append(vars(dealer))
+        context = {"dealerships":dealerships}
+        return render(request, 'djangoapp/index.html', context)
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request):
     context = {}
+    reviews = []
     if request.method == "GET" and 'dealerId' in request.GET:
         context = getReviewByDealership(request.GET['dealerId'])
+        if 'reviews' in context:
+            for review in context['reviews']:
+                if 'review' in vars(review):
+                    reviews.append(vars(review))
+        context = {"reviews":reviews}
         return render(request, 'djangoapp/dealer_details.html', context)
     
     elif request.method == "POST":
         print("do something lol")
 
-# Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+def add_review(request, dealer_id=13):
+        context = {}
+        if request.method == "GET":
+            print("get review form")
+            context = {"dealer_id": dealer_id}
+            return render(request, 'djangoapp/add_review.html', context)
+
+        elif request.method == "POST":
+            review = request.POST['review']
+            car = request.POST['car'].split()
+            car_year = int(car[0])
+            car_make = car[1]
+            car_model = car[2]
+            purchase_date = request.POST['purchasedate']
+            if 'purchasecheck' in request.POST:
+                reviewData = {
+                    "name": "anon",
+                    "dealership": int(dealer_id),
+                    "review": review,
+                    "purchase": True,
+                    "purchase_date": purchase_date,
+                    "car_make": car_make,
+                    "car_model": car_model,
+                    "car_year": car_year
+                }
+            else:
+                reviewData = {
+                    "name": "anon",
+                    "dealership": int(dealer_id),
+                    "review": review,
+                    "purchase": False,
+                }
+            print("Posting review" + str(reviewData))
+            addReviewToCloudant(reviewData)
+            next = request.POST.get('next', '/')
+            return HttpResponseRedirect(next)
+
+        
 

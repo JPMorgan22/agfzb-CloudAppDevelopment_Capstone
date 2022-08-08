@@ -9,7 +9,97 @@
 
     <body>
 
-        <p> reviews: {{ reviews }}</p>
+        <nav class="navbar navbar-dark bg-dark">
+            <div style="justify-content:space-around;" class="container-fluid">
+                <div class="navbar-header">
+                      <a class="navbar-brand" href="./">Dealerships</a>
+                </div>
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="about">About Us</a>
+                </div>
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="contact">Contact Us</a>
+                </div>
+                {% if user.is_authenticated %}
+                    <div style="display: flex; flex-direction: row; align-items: center;">
+                        <button style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">Hello, {{user.first_name}}!</button>
+                        <button style="margin-left: 10px;background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">
+                            <a href="{% url 'djangoapp:logout' %}">Logout</a>
+                        </button>
+                    </div>
+                {% else %}
+                    <form action="./login">
+                        <button 
+                            type="submit" 
+                            style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
+                            formaction="./login"
+                        >
+                            Login
+                        </button>
+                        <button 
+                            type="submit" 
+                            style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998" 
+                            formaction="./signup"
+                        >
+                            Sign Up
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </nav>
+
+        <h2 style="text-align: center; margin-top: 30px;">
+            {{ request.GET.name }} Reviews
+            <form action="{% url 'djangoapp:add_review' request.GET.dealerId %}">
+                <button 
+                    type="submit" 
+                    class="addReviewButton" 
+                    formaction="{% url 'djangoapp:add_review' request.GET.dealerId %}"
+                >
+                    Add Review
+                </button>
+            </form>
+        </h2>
+
+        <div style="display: flex; flex-direction: row; justify-content: center; flex-wrap: wrap;">
+            {% for review in reviews %}
+                {% if review.purchase %}
+                    <div class="card-light">
+                        <div class="card-header">
+                            {% if review.sentiment == 'negative' %}
+                                <img class="sentiment" src="../media/emoji/negative.png"/>
+                            {% elif review.sentiment == 'neutral' %}
+                                <img class="sentiment" src="../media/emoji/neutral.png"/>
+                            {% elif review.sentiment == 'positive' %}
+                                <img class="sentiment" src="../media/emoji/positive.png"/>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                        <h5 class="card-title">{{ review.car_make }}, {{ review.car_model }} </h5>
+                        <h5 class="card-title">{{ review.car_year }}</h5>
+                        <p class="card-text">{{ review.review }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card-light">
+                        <div class="card-header">
+                            {% if review.sentiment == 'negative' %}
+                                <img class="sentiment" src="../media/emoji/negative.png"/>
+                            {% elif review.sentiment == 'neutral' %}
+                                <img class="sentiment" src="../media/emoji/neutral.png"/>
+                            {% elif review.sentiment == 'positive' %}
+                                <img class="sentiment" src="../media/emoji/positive.png"/>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                        <h5 class="card-title">Dealership review (no purchase)</h5>
+                        <p class="card-text">{{ review.review }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
     <!--Add a nav bar here -->
 
     <!-- Add reviews as cards -->
@@ -17,3 +107,41 @@
     </body>
 
 </html>
+
+<style>
+    .card-light {
+        max-width: 18vw;
+        margin:  15px;
+        margin-top: 40px;
+        border-style: 1px solid white;
+        border-radius: 2px;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    }
+    .card-header {
+        background-color: white;
+        border-width: 1px;
+        border-color: lightgray;
+    }
+    .card-body {
+        background-color: whitesmoke;
+    }
+    .card-title {
+        font-weight: bold;
+    }
+    .card-text {
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    }
+    .sentiment {
+        height: 35px;
+        width: 35px;
+    }
+    .addReviewButton {
+        margin-top: 10px;
+        background-color:#d0ffd7;
+        border-radius:5px;
+        border-width:0px;
+        padding-left:10px;
+        padding-right:10px;
+        color:#21e031
+    }
+</style>
