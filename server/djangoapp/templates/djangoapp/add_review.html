@@ -23,7 +23,11 @@
             </div>
             {% if user.is_authenticated %}
                 <div style="display: flex; flex-direction: row; align-items: center;">
-                    <button style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">Hello, {{user.first_name}}!</button>
+                    {% if user.first_name %}
+                        <button style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">Hello, {{user.first_name}}!</button>
+                    {% else %}
+                        <button style="background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">Hello, {{user.username}}!</button>
+                    {% endif %}
                     <button style="margin-left: 10px;background-color:#DFE3EE;border-radius:5px;border-width:0px;padding-left:10px;padding-right:10px;color:#3B5998">
                         <a href="{% url 'djangoapp:logout' %}">Logout</a>
                     </button>
