@@ -64,8 +64,9 @@
             <div class="carName">
                 <p style="margin-top: 2px;font-weight: 600;">Which car did you purchase?:</p>
                 <select name="car" id="car" class="form-select" required>
-                    <option selected value="2008 Ford F-150">2008 Ford F-150</option>
-                    <option selected value="2007 Jeep Commander">2007 Jeep Commander</option>
+                    {% for car in cars %}
+                        <option selected value="{{ car.Year.year }} {{ car.CarMake.Name }} {{ car.Name }}">{{ car.Year.year }} {{ car.CarMake.Name }} {{ car.Name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="purchaseDate">

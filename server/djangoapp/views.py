@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
-# from .models import related models
+from .models import CarMake, CarModel
 from .restapis import getDealershipByState, getAllDealerships, getReviewByDealership, addReviewToCloudant
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -128,11 +128,17 @@ def get_dealer_details(request):
     elif request.method == "POST":
         print("do something lol")
 
-def add_review(request, dealer_id=13):
+def add_review(request, dealer_id=10):
         context = {}
         if request.method == "GET":
             print("get review form")
-            context = {"dealer_id": dealer_id}
+            cars = CarModel.objects.filter(DealerID=dealer_id)
+            print("CARS:")
+            print(cars)
+            context = {
+                "dealer_id": dealer_id,
+                "cars": cars
+            }
             return render(request, 'djangoapp/add_review.html', context)
 
         elif request.method == "POST":

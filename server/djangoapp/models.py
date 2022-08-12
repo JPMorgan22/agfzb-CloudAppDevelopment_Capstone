@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.timezone import now
 
 class CarMake(models.Model):
-    Name = models.CharField(null=False, max_length=30, default='Ford')
+    Name = models.CharField(null=False, max_length=30, default='Ferrari')
     Description = models.CharField(null=False, max_length=30, default='Ford Car')
     
     # Create a toString method for object string representation
